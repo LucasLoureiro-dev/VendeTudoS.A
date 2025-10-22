@@ -1,3 +1,4 @@
+drop database quimex;
 create database quimex;
  
 use quimex;
@@ -40,7 +41,9 @@ create table lojas(
 create table usuarios(
 	id int not null auto_increment primary key, 
 	nome varchar(255) not null, 
-    cpf varchar(255) not null, 
+    cpf varchar(255) not null,
+    RE varchar(255) not null,
+    senha varchar(255) not null,
     contato varchar(255) not null, 
     sexo varchar(69) not null, 
     cargo varchar(16) not null, 

@@ -13,15 +13,39 @@ export function startChat(server) {
     },
   });
 
+  
+  let usuarios = {};
+
   io.on("connection", (socket) => {
+    console.log("Novo usuário conectado:", socket.id);
 
-    socket.on("usuario", (user) => {
-      console.log("Novo usuario: ", user.nome, ", com id: ", socket.id)
-      socket.emit("usuario", { nome: user.nome, senha: user.senha, socketId: socket.id })
-    })
+    // Quando o usuário se identifica
+    socket.on("usuario", (nome) => {
+      usuarios[nome] = socket.id;
+      console.log(`${nome} registrado com ID ${socket.id}`);
+      io.emit("listaUsuarios", Object.keys(usuarios)); // Atualiza lista para todos
+    });
 
+    // Recebe mensagem privada
+    socket.on("mensagemPrivada", ({ de, para, conteudo, horario }) => {
+      const idDestino = usuarios[para];
+      if (idDestino) {
+        io.to(idDestino).emit("mensagemPrivada", { de, conteudo, horario });
+        console.log(`${de} → ${para}: ${conteudo} horario: ${horario}`);
+      }
+    });
+
+    // Quando o usuário desconecta
     socket.on("disconnect", () => {
-      console.log("Usuário desconectado:", socket.id);
+      // Remove da lista
+      for (let nome in usuarios) {
+        if (usuarios[nome] === socket.id) {
+          console.log(`${nome} saiu`);
+          delete usuarios[nome];
+          break;
+        }
+      }
+      io.emit("listaUsuarios", Object.keys(usuarios)); // Atualiza lista
     });
   });
 }

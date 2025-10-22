@@ -5,5 +5,6 @@ import express, { Router } from "express"
 const router = express.Router()
 
 router.get("/", listar_usuariosController)
+router.post("/", criar_usuarioController)
 
 export default router;

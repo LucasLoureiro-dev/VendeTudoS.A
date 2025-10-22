@@ -4,6 +4,7 @@ import {
   update_usuario,
   delete_usuario,
 } from "../models/usuarios.js";
+import generateHashedPassword from "../hashPassword.js";
 
 const listar_usuariosController = async (req, res) => {
   try {
@@ -19,11 +20,25 @@ const listar_usuariosController = async (req, res) => {
 
 const criar_usuarioController = async (req, res) => {
   try {
-    const { nome, cpf, contato, sexo, cargo, vinculo, loja_vinculada } =
-      req.body;
+    const {
+      nome,
+      cpf,
+      re,
+      senha,
+      contato,
+      sexo,
+      cargo,
+      vinculo,
+      loja_vinculada,
+    } = req.body;
+
+    const senhaHasheada = await generateHashedPassword(senha)
+
     const data = {
       nome: nome,
       cpf: cpf,
+      re: re,
+      senha: senhaHasheada,
       contato: contato,
       sexo: sexo,
       cargo: cargo,

@@ -135,4 +135,8 @@ async function lucas(lucas) {
     return lucas
 }
 
-export { create, readAll, read, update, deleteRecord, compare, lucas };
+async function arthur(arthur) {
+    return arthur
+}
+
+export { create, readAll, read, update, deleteRecord, compare, lucas, arthur };

@@ -1,5 +1,8 @@
 import {
- listar_lojas, criar_loja, atualizar_loja,  excluir_loja
+  listar_lojas,
+  criar_loja,
+  atualizar_loja,
+  excluir_loja,
 } from "../models/lojas.js";
 
 const listar_lojasController = async (req, res) => {
@@ -16,41 +19,59 @@ const listar_lojasController = async (req, res) => {
 
 const criar_lojaController = async (req, res) => {
   try {
-    const { produto } = req.body;
+    const {
+      nome,
+      localizacao,
+      cep,
+      contato,
+      horario_abertura,
+      horario_fechamento,
+    } = req.body;
     const data = {
-      nome : nome ,
-      codigo_de_barras : codigo_de_barras ,
-      descricao : descricao ,
-      fornecedor : fornecedor ,
-      preco : preco 
+      nome: nome,
+      localização: localizacao,
+      cep: cep,
+      contato: contato,
+      horario_abertura: horario_abertura,
+      horario_fenchamento: horario_fechamento,
     };
     const criado = await criar_loja(data);
     res.status(200).json({ criado });
   } catch (err) {
-    console.error("Erro criando produto químico:", err);
-    res
-      .status(500)
-      .json({ message: "Erro ao criar produto químico", error: err.message });
+    console.error("Erro criando loja:", err);
+    res.status(500).json({ message: "Erro ao criar loja", error: err.message });
   }
 };
 
 const atualizar_lojaController = async (req, res) => {
   try {
-     const { produto } = req.body;
+    const id = req.params.id;
+    const {
+      nome,
+      localizacao,
+      cep,
+      contato,
+      horario_abertura,
+      horario_fechamento,
+    } = req.body;
     const data = {
-      nome : nome ,
-      codigo_de_barras : codigo_de_barras ,
-      descricao : descricao ,
-      fornecedor : fornecedor ,
-      preco : preco 
+      nome: nome,
+      localização: localizacao,
+      cep: cep,
+      contato: contato,
+      horario_abertura: horario_abertura,
+      horario_fenchamento: horario_fechamento,
     };
-    const atualizado  = await atualizar_loja(data);
+    const atualizado = await atualizar_loja(id, data);
     res.status(200).json({ atualizado });
   } catch (err) {
     console.error("Erro atualizando produto químico:", err);
     res
       .status(500)
-      .json({ message: "Erro ao atualizar produto químico", error: err.message });
+      .json({
+        message: "Erro ao atualizar produto químico",
+        error: err.message,
+      });
   }
 };
 
@@ -67,4 +88,9 @@ const excluir_lojaController = async (req, res) => {
   }
 };
 
-export { listar_lojasController, criar_lojaController, atualizar_lojaController, excluir_lojaController };
+export {
+  listar_lojasController,
+  criar_lojaController,
+  atualizar_lojaController,
+  excluir_lojaController,
+};

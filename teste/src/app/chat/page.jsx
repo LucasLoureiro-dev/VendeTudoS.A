@@ -8,27 +8,55 @@ import { date } from "zod";
 export default function Home() {
   const [socket, setSocket] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
+  const [usuariosBanco, setUsuariosBanco] = useState([]);
+  const [usuario, setUsuario] = useState("");
   const [destino, setDestino] = useState("");
   const [mensagem, setMensagem] = useState("");
-  const [chatPrivado, setChatPrivado] = useState([]);
+  const [chatPrivado, setChatPrivado] = useState(null);
   const [horarioAtual, setHorarioAtual] = useState("");
   const [horarioMensagem, setHorarioMensagem] = useState("");
   const messagesEndRef = useRef(null);
+  // useEffect {ola, setOla} != const(Gera-resposta() <=={
+  //   const.logaritimo(respo),
+  // }).
 
   useEffect(() => {
     const socketInstance = io("http://localhost:8080", { path: "/chat" });
     setSocket(socketInstance);
 
+    fetch("http://localhost:8080/dashboard", {
+      credentials: "include",
+    }).then(async (res) => {
+      const ola = await res.json();
+      console.log(ola);
+      if (ola.usuario != "" || ola.usuario != null) {
+        socketInstance.emit("usuario", {ola, status: "Online"});
+        setUsuario({ola, status: "Online"});
+      } else {
+        console.log("faça login energumeno");
+      }
+    });
+
+    fetch("http://localhost:8080/usuarios", {
+      credentials: "include",
+    }).then(async (res) => {
+      const usuarios_banco = await res.json();
+      console.log(usuarios_banco);
+      setUsuariosBanco(usuarios_banco);
+    });
+
     // Escuta lista de usuários
-    socketInstance.on("listaUsuarios", (lista) => {
+    socketInstance.on("listaUsuarios", (lista, status) => {
       console.log(lista);
-      setUsuarios(lista);
+      setUsuarios({lista, status});
     });
 
     // Recebe mensagens privadas
     socketInstance.on("mensagemPrivada", ({ de, conteudo, horario }) => {
       setChatPrivado((prev) => [...prev, { de, conteudo, horario }]);
     });
+
+    return () => socketInstance.disconnect();
   }, []);
 
   const enviarMensagem = async () => {
@@ -42,14 +70,15 @@ export default function Home() {
 
       setHorarioAtual(
         baseTime.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit"
-        }));
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
     } catch (err) {
       console.log(err);
     }
 
-    console.log(horarioAtual)
+    console.log(horarioAtual);
 
     if (!destino || !mensagem) return "";
     socket.emit("mensagemPrivada", {
@@ -70,14 +99,18 @@ export default function Home() {
     setMensagem("");
   };
 
+  useEffect(() => {
+    if (usuariosBanco) {
+      const acha_usuario = usuariosBanco.find((ola) => ola.id == usuario.id);
+    }
+  }, [usuariosBanco]);
+
   const statusColors = {
     online: "bg-green-500",
     offline: "bg-gray-400",
     ocupado: "bg-red-500",
     ausente: "bg-yellow-400",
   };
-
-  console.log(usuarios)
 
   return (
     <>
@@ -94,29 +127,57 @@ export default function Home() {
 
             <div className="flex-1 overflow-y-auto">
               <h3 className="px-4 pt-3 font-semibold text-gray-600">
-                Usuários
+                Pedófelos online
               </h3>
-              {/* {users.map((u) => (
-                <div
-                  key={u.id}
-                  onClick={() => setActiveChat(u)}
-                  className={`flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50 ${
-                    activeChat.id === u.id ? "bg-blue-100" : ""
-                  }`}
-                >
-                  <div
-                    className={`w-3 h-3 rounded-full mr-2 ${
-                      statusColors[u.status]
-                    }`}
-                  ></div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">
-                      {u.name}
-                    </p>
-                    <p className="text-xs text-gray-500">{u.role}</p>
-                  </div>
-                </div>
-              ))} */}
+              {usuariosBanco.map((u, k) => {
+                return (
+                  <button type="button" key={k}>
+                    <div
+                      onClick={() => setChatPrivado(u.id)}
+                      className={`flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50`}
+                    >
+                      <div className={`w-3 h-3 rounded-full mr-2`}></div>
+                      <div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-800">
+                            {u.nome} (online)
+                          </p>
+                          <p className="text-xs text-gray-500">{u.cargo}</p>
+                        </div>
+                        {/* {usuarios.map((users, index) => {
+                          console.log(usuariosBanco)
+                          console.log(users)
+                          var usuarios_achados = []
+                          const acha_usuario = usuariosBanco.find((uid) => uid.id === users.id_usuario)
+                          usuarios_achados.push(acha_usuario)
+                          console.log(usuarios_achados)
+                          if (usuarios_achados) {
+                            return (
+                              <div key={index}> 
+                                <p
+                                  
+                                  className="text-sm font-medium text-gray-800"
+                                >
+                                  {usuarios_achados.nome} (online)
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {usuarios_achados.cargo}
+                                </p>
+                              </div>
+                            );
+                          } else {
+                            // return (
+                            //   <p key={index} className="text-sm font-medium text-gray-800">
+                            //     {u.nome} (offline)
+                            //   </p>
+                            // );
+                          }
+                        })} */}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </aside>
 
@@ -136,11 +197,11 @@ export default function Home() {
 
             {/* Mensagens */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3">
-              {chatPrivado.map((msg, i) => {
+              {/* {chatPrivado.map((msg, i) => {
                 if (msg.de === "Você") {
                   return <div className=""></div>;
                 }
-              })}
+              })} */}
               <div ref={messagesEndRef} />
             </div>
 

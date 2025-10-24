@@ -1,20 +1,12 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
 
 export default function Home() {
   const [form, setForm] = useState({
     re: "",
     senha: "",
   });
-  const [socket, setSocket] = useState(null)
-
- useEffect(() => {
-    const socketInstance = io("http://localhost:8080", { path: "/chat" });
-    setSocket(socketInstance);
-    
-  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,10 +27,6 @@ export default function Home() {
     }
 
     const data = await res.json();
-
-    if(data){
-      socket.emit("usuario", data.nome)
-    }
 
     if (data.cargo == "Administrador") {
       window.location.href = "/dashboard/adm";

@@ -8,6 +8,7 @@ import login from "./routes/authRotas.js";
 import chat from "./routes/chatRotas.js";
 import startChat from "./routes/chatRotas.js";
 import dashboard from "./routes/dashboadRota.js";
+import lojas from "./routes/lojasRotas.js";
 
 // 1. Carrega variáveis de ambiente PRIMEIRO
 dotenv.config();
@@ -42,7 +43,7 @@ app.use("/usuarios", usuario);
 app.use("/chat", chat);
 app.use("/login", login);
 app.use("/dashboard", dashboard);
-
+app.use("/lojas", lojas);
 
 server
   .listen(porta, () => {
